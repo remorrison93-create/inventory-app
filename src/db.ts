@@ -1,5 +1,5 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb'
-import type { Item, NewItem } from './types'
+import type { Comic, Item, NewComic, NewItem } from './types'
 
 interface InventoryDB extends DBSchema {
   items: {
@@ -7,16 +7,25 @@ interface InventoryDB extends DBSchema {
     value: Item
     indexes: { room: string }
   }
+  comics: {
+    key: string
+    value: Comic
+  }
 }
 
 let dbPromise: Promise<IDBPDatabase<InventoryDB>> | null = null
 
 function getDB() {
   if (!dbPromise) {
-    dbPromise = openDB<InventoryDB>('inventory-db', 1, {
-      upgrade(db) {
-        const store = db.createObjectStore('items', { keyPath: 'id' })
-        store.createIndex('room', 'room')
+    dbPromise = openDB<InventoryDB>('inventory-db', 2, {
+      upgrade(db, oldVersion) {
+        if (oldVersion < 1) {
+          const store = db.createObjectStore('items', { keyPath: 'id' })
+          store.createIndex('room', 'room')
+        }
+        if (oldVersion < 2) {
+          db.createObjectStore('comics', { keyPath: 'id' })
+        }
       },
     })
   }
@@ -63,4 +72,33 @@ export async function adjustQuantity(id: string, delta: number): Promise<Item | 
   }
   await db.put('items', updated)
   return updated
+}
+
+export async function getAllComics(): Promise<Comic[]> {
+  const db = await getDB()
+  const comics = await db.getAll('comics')
+  return comics.sort((a, b) => b.updatedAt - a.updatedAt)
+}
+
+export async function addComic(comic: NewComic): Promise<Comic> {
+  const db = await getDB()
+  const now = Date.now()
+  const full: Comic = {
+    ...comic,
+    id: crypto.randomUUID(),
+    createdAt: now,
+    updatedAt: now,
+  }
+  await db.put('comics', full)
+  return full
+}
+
+export async function updateComic(comic: Comic): Promise<void> {
+  const db = await getDB()
+  await db.put('comics', { ...comic, updatedAt: Date.now() })
+}
+
+export async function deleteComic(id: string): Promise<void> {
+  const db = await getDB()
+  await db.delete('comics', id)
 }

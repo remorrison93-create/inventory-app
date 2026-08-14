@@ -15,6 +15,12 @@
   top: 0;
   z-index: 5;
   display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.app-header-top {
+  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -22,6 +28,28 @@
 
 .app-header h1 {
   font-size: 20px;
+}
+
+.collection-switcher {
+  display: flex;
+  gap: 8px;
+}
+
+.collection-switcher button {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.collection-switcher button.active {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
 }
 
 .export-btn {
@@ -99,12 +127,15 @@
 }
 
 .item-form input,
-.item-form select {
+.item-form select,
+.item-form textarea {
   padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface);
   color: var(--text-h);
+  font: inherit;
+  resize: vertical;
 }
 
 .preset-select {
@@ -400,4 +431,136 @@ button.secondary.danger {
   color: var(--danger);
   font-weight: 700;
   font-size: 13px;
+}
+
+.stat-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.stat-label {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-h);
+}
+
+.stat-sub {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+/* Multi-photo input */
+.multi-photo-input {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.multi-photo-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.multi-photo-thumb {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.multi-photo-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.multi-photo-remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.multi-photo-add {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  border: 1px dashed var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12px;
+}
+
+/* Custom fields */
+.custom-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.custom-fields-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.custom-field-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.custom-field-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-h);
+}
+
+/* Comic card */
+.comic-issue {
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.comic-condition {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-top: 2px;
+}
+
+.comic-value {
+  grid-column: 3;
+  grid-row: 1;
+  font-weight: 700;
+  color: var(--text-h);
+  white-space: nowrap;
 }
