@@ -23,6 +23,7 @@ function App() {
   }, [])
 
   const rooms = useMemo(() => Array.from(new Set(items.map((i) => i.room))).sort(), [items])
+  const itemNames = useMemo(() => Array.from(new Set(items.map((i) => i.name))).sort(), [items])
 
   async function handleAdd(newItem: NewItem) {
     const created = await addItem(newItem)
@@ -79,10 +80,16 @@ function App() {
         ) : view === 'inventory' ? (
           <InventoryList items={items} onAdjust={handleAdjust} onEdit={startEdit} onDelete={handleDelete} />
         ) : view === 'add' ? (
-          <ItemForm rooms={rooms} onSubmit={handleAdd} onCancel={() => setView('inventory')} />
+          <ItemForm
+            rooms={rooms}
+            itemNames={itemNames}
+            onSubmit={handleAdd}
+            onCancel={() => setView('inventory')}
+          />
         ) : view === 'edit' && editingItem ? (
           <ItemForm
             rooms={rooms}
+            itemNames={itemNames}
             initial={editingItem}
             onSubmit={handleUpdate}
             onCancel={() => {

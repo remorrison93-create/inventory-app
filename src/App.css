@@ -98,12 +98,49 @@
   color: var(--text-h);
 }
 
-.item-form input {
+.item-form input,
+.item-form select {
   padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface);
   color: var(--text-h);
+}
+
+.preset-select {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.preset-select-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.preset-add-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.preset-add-row input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-h);
+}
+
+.preset-add-row .secondary {
+  flex-shrink: 0;
+  padding: 10px 14px;
+}
+
+.preset-add-row .link-btn {
+  flex-shrink: 0;
 }
 
 .form-actions {

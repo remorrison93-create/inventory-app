@@ -1,20 +1,31 @@
-import { useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import PhotoInput from './PhotoInput'
+import PresetSelect from './PresetSelect'
+import { COMMON_ITEMS, COMMON_ROOMS } from '../presets'
 import type { Item, NewItem } from '../types'
 
 interface Props {
   rooms: string[]
+  itemNames: string[]
   initial?: Item
   onSubmit: (item: NewItem) => void
   onCancel: () => void
 }
 
-export default function ItemForm({ rooms, initial, onSubmit, onCancel }: Props) {
+function dedupeCustom(known: string[], presets: string[]): string[] {
+  const presetSet = new Set(presets.map((p) => p.toLowerCase()))
+  return Array.from(new Set(known.filter((k) => !presetSet.has(k.toLowerCase())))).sort()
+}
+
+export default function ItemForm({ rooms, itemNames, initial, onSubmit, onCancel }: Props) {
   const [name, setName] = useState(initial?.name ?? '')
   const [room, setRoom] = useState(initial?.room ?? '')
   const [quantity, setQuantity] = useState(initial?.quantity ?? 1)
   const [lowStockThreshold, setLowStockThreshold] = useState(initial?.lowStockThreshold ?? 1)
   const [photo, setPhoto] = useState<Blob | null>(initial?.photo ?? null)
+
+  const customRooms = useMemo(() => dedupeCustom(rooms, COMMON_ROOMS), [rooms])
+  const customItems = useMemo(() => dedupeCustom(itemNames, COMMON_ITEMS), [itemNames])
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -32,33 +43,29 @@ export default function ItemForm({ rooms, initial, onSubmit, onCancel }: Props) 
     <form className="item-form" onSubmit={handleSubmit}>
       <PhotoInput value={photo} onChange={setPhoto} />
 
-      <label>
-        Item name
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="e.g. Paper towels"
-          required
-        />
-      </label>
+      <PresetSelect
+        label="Item name"
+        value={name}
+        onChange={setName}
+        presetOptions={COMMON_ITEMS}
+        customOptions={customItems}
+        presetGroupLabel="Common Items"
+        customGroupLabel="Your Items"
+        addLabel="+ Add new item..."
+        placeholder="e.g. Waffle mix"
+      />
 
-      <label>
-        Room
-        <input
-          type="text"
-          list="room-options"
-          value={room}
-          onChange={(e) => setRoom(e.target.value)}
-          placeholder="e.g. Kitchen"
-          required
-        />
-        <datalist id="room-options">
-          {rooms.map((r) => (
-            <option key={r} value={r} />
-          ))}
-        </datalist>
-      </label>
+      <PresetSelect
+        label="Room"
+        value={room}
+        onChange={setRoom}
+        presetOptions={COMMON_ROOMS}
+        customOptions={customRooms}
+        presetGroupLabel="Common Rooms"
+        customGroupLabel="Your Rooms"
+        addLabel="+ Add new room..."
+        placeholder="e.g. Mudroom"
+      />
 
       <label>
         Quantity
