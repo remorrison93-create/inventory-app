@@ -44,13 +44,42 @@
 
 .collection-switcher button {
   flex: 1;
-  padding: 8px;
+  padding: 8px 4px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface);
   color: var(--text);
   font-size: 13px;
   font-weight: 600;
+}
+
+.type-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.type-toggle button {
+  flex: 1;
+  padding: 10px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.type-toggle button.active {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+}
+
+.computed-total {
+  margin: -8px 0 0;
+  font-size: 13px;
+  color: var(--text-h);
+  opacity: 0.8;
 }
 
 .collection-switcher button.active {

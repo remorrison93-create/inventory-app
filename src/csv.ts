@@ -1,4 +1,4 @@
-import type { Comic, Item } from './types'
+import type { Comic, Item, MunitionsItem } from './types'
 
 function escapeCsvField(value: string | number): string {
   const str = String(value)
@@ -75,4 +75,60 @@ export function comicsToCsv(comics: Comic[]): string {
 export function downloadComicsCsv(comics: Comic[]): void {
   const date = new Date().toISOString().slice(0, 10)
   triggerDownload(comicsToCsv(comics), `comics-${date}.csv`)
+}
+
+export function munitionsToCsv(items: MunitionsItem[]): string {
+  const customKeys = Array.from(new Set(items.flatMap((i) => i.customFields.map((f) => f.key)))).sort()
+
+  const header = [
+    'Type',
+    'Name',
+    'Manufacturer',
+    'Caliber',
+    'Category',
+    'Bullet Weight (gr)',
+    'Bullet Type',
+    'Rounds per Box',
+    'Quantity',
+    'Total Rounds',
+    'Low Stock Threshold',
+    'Location',
+    'Condition',
+    'Photo Count',
+    'Notes',
+    'Last Updated',
+    ...customKeys,
+  ]
+
+  const rows = items.map((item) => {
+    const fieldMap = new Map(item.customFields.map((f) => [f.key, f.value]))
+    const totalRounds =
+      item.itemType === 'Ammunition' && item.roundsPerBox ? item.quantity * item.roundsPerBox : ''
+    return [
+      item.itemType,
+      item.name,
+      item.manufacturer,
+      item.caliber,
+      item.category,
+      item.bulletWeightGr ?? '',
+      item.bulletType,
+      item.roundsPerBox ?? '',
+      item.quantity,
+      totalRounds,
+      item.lowStockThreshold,
+      item.location,
+      item.condition,
+      item.photos.length,
+      item.notes,
+      new Date(item.updatedAt).toISOString(),
+      ...customKeys.map((key) => fieldMap.get(key) ?? ''),
+    ]
+  })
+
+  return [header, ...rows].map((row) => row.map(escapeCsvField).join(',')).join('\r\n')
+}
+
+export function downloadMunitionsCsv(items: MunitionsItem[]): void {
+  const date = new Date().toISOString().slice(0, 10)
+  triggerDownload(munitionsToCsv(items), `munitions-${date}.csv`)
 }

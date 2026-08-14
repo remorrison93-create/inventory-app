@@ -7,22 +7,43 @@ import ComicList from './components/ComicList'
 import ComicForm from './components/ComicForm'
 import ComicDashboard from './components/ComicDashboard'
 import ComicImport from './components/ComicImport'
+import MunitionsList from './components/MunitionsList'
+import MunitionsForm from './components/MunitionsForm'
+import MunitionsDashboard from './components/MunitionsDashboard'
+import MunitionsImport from './components/MunitionsImport'
 import {
   addComic,
   addItem,
+  addMunitionsItem,
+  adjustMunitionsQuantity,
   adjustQuantity,
   deleteComic,
   deleteItem,
+  deleteMunitionsItem,
   getAllComics,
   getAllItems,
+  getAllMunitions,
   updateComic,
   updateItem,
+  updateMunitionsItem,
 } from './db'
-import { downloadComicsCsv, downloadItemsCsv } from './csv'
-import type { Comic, Item, NewComic, NewItem } from './types'
+import { downloadComicsCsv, downloadItemsCsv, downloadMunitionsCsv } from './csv'
+import type { Comic, Item, MunitionsItem, NewComic, NewItem, NewMunitionsItem } from './types'
 
-type Collection = 'household' | 'comics'
+type Collection = 'household' | 'comics' | 'munitions'
 type View = 'list' | 'add' | 'edit' | 'dashboard' | 'import'
+
+const COLLECTION_LABELS: Record<Collection, string> = {
+  household: 'Household',
+  comics: 'Comics',
+  munitions: 'Munitions',
+}
+
+const COLLECTION_TITLES: Record<Collection, string> = {
+  household: 'Home Inventory',
+  comics: 'Comic Collection',
+  munitions: 'Munitions',
+}
 
 function App() {
   const [collection, setCollection] = useState<Collection>('household')
@@ -35,19 +56,29 @@ function App() {
   const [comics, setComics] = useState<Comic[]>([])
   const [editingComic, setEditingComic] = useState<Comic | null>(null)
 
+  const [munitions, setMunitions] = useState<MunitionsItem[]>([])
+  const [editingMunitionsItem, setEditingMunitionsItem] = useState<MunitionsItem | null>(null)
+
   useEffect(() => {
-    Promise.all([getAllItems(), getAllComics()]).then(([itemData, comicData]) => {
-      setItems(itemData)
-      setComics(comicData)
-      setLoaded(true)
-    })
+    Promise.all([getAllItems(), getAllComics(), getAllMunitions()]).then(
+      ([itemData, comicData, munitionsData]) => {
+        setItems(itemData)
+        setComics(comicData)
+        setMunitions(munitionsData)
+        setLoaded(true)
+      },
+    )
   }, [])
 
   const rooms = useMemo(() => Array.from(new Set(items.map((i) => i.room))).sort(), [items])
   const itemNames = useMemo(() => Array.from(new Set(items.map((i) => i.name))).sort(), [items])
-  const locations = useMemo(
+  const comicLocations = useMemo(
     () => Array.from(new Set(comics.map((c) => c.location).filter(Boolean))).sort(),
     [comics],
+  )
+  const munitionsLocations = useMemo(
+    () => Array.from(new Set(munitions.map((m) => m.location).filter(Boolean))).sort(),
+    [munitions],
   )
 
   function switchCollection(next: Collection) {
@@ -55,6 +86,7 @@ function App() {
     setView('list')
     setEditingItem(null)
     setEditingComic(null)
+    setEditingMunitionsItem(null)
   }
 
   async function handleAdd(newItem: NewItem) {
@@ -124,85 +156,106 @@ function App() {
     setComics((prev) => [...created, ...prev])
   }
 
-  const isHousehold = collection === 'household'
+  async function handleAddMunitionsItem(newItem: NewMunitionsItem) {
+    const created = await addMunitionsItem(newItem)
+    setMunitions((prev) => [created, ...prev])
+    setView('list')
+  }
 
-  return (
-    <div className="app">
-      <header className="app-header">
-        <div className="app-header-top">
-          <h1>{isHousehold ? 'Home Inventory' : 'Comic Collection'}</h1>
-          <div className="header-actions">
-            {!isHousehold && (
-              <button type="button" className="export-btn" onClick={() => setView('import')}>
-                Import CSV
-              </button>
-            )}
-            <button
-              type="button"
-              className="export-btn"
-              onClick={() => (isHousehold ? downloadItemsCsv(items) : downloadComicsCsv(comics))}
-              disabled={isHousehold ? items.length === 0 : comics.length === 0}
-            >
-              Export CSV
-            </button>
-          </div>
-        </div>
-        <div className="collection-switcher">
-          <button
-            type="button"
-            className={isHousehold ? 'active' : ''}
-            onClick={() => switchCollection('household')}
-          >
-            Household
-          </button>
-          <button
-            type="button"
-            className={!isHousehold ? 'active' : ''}
-            onClick={() => switchCollection('comics')}
-          >
-            Comics
-          </button>
-        </div>
-      </header>
+  async function handleUpdateMunitionsItem(updates: NewMunitionsItem) {
+    if (!editingMunitionsItem) return
+    const updated: MunitionsItem = { ...editingMunitionsItem, ...updates, updatedAt: Date.now() }
+    await updateMunitionsItem(updated)
+    setMunitions((prev) => prev.map((m) => (m.id === updated.id ? updated : m)))
+    setEditingMunitionsItem(null)
+    setView('list')
+  }
 
-      <main className="app-main">
-        {!loaded ? (
-          <div className="empty-state">
-            <p>Loading...</p>
-          </div>
-        ) : isHousehold ? (
-          view === 'list' ? (
-            <InventoryList items={items} onAdjust={handleAdjust} onEdit={startEdit} onDelete={handleDelete} />
-          ) : view === 'add' ? (
-            <ItemForm
-              rooms={rooms}
-              itemNames={itemNames}
-              onSubmit={handleAdd}
-              onCancel={() => setView('list')}
-            />
-          ) : view === 'edit' && editingItem ? (
-            <ItemForm
-              rooms={rooms}
-              itemNames={itemNames}
-              initial={editingItem}
-              onSubmit={handleUpdate}
-              onCancel={() => {
-                setEditingItem(null)
-                setView('list')
-              }}
-            />
-          ) : (
-            <Dashboard items={items} />
-          )
-        ) : view === 'list' ? (
-          <ComicList comics={comics} onEdit={startEditComic} onDelete={handleDeleteComic} />
-        ) : view === 'import' ? (
-          <ComicImport onImport={handleImportComics} onCancel={() => setView('list')} />
-        ) : view === 'add' ? (
-          <ComicForm locations={locations} onSubmit={handleAddComic} onCancel={() => setView('list')} />
-        ) : view === 'edit' && editingComic ? (
+  async function handleAdjustMunitions(id: string, delta: number) {
+    const updated = await adjustMunitionsQuantity(id, delta)
+    if (updated) {
+      setMunitions((prev) => prev.map((m) => (m.id === id ? updated : m)))
+    }
+  }
+
+  async function handleDeleteMunitionsItem(id: string) {
+    if (!confirm('Delete this item?')) return
+    await deleteMunitionsItem(id)
+    setMunitions((prev) => prev.filter((m) => m.id !== id))
+  }
+
+  function startEditMunitionsItem(item: MunitionsItem) {
+    setEditingMunitionsItem(item)
+    setView('edit')
+  }
+
+  async function handleImportMunitions(newItems: NewMunitionsItem[]) {
+    const created: MunitionsItem[] = []
+    for (const newItem of newItems) {
+      created.push(await addMunitionsItem(newItem))
+    }
+    setMunitions((prev) => [...created, ...prev])
+  }
+
+  const hasImport = collection !== 'household'
+  const currentCount =
+    collection === 'household' ? items.length : collection === 'comics' ? comics.length : munitions.length
+
+  function handleExport() {
+    if (collection === 'household') downloadItemsCsv(items)
+    else if (collection === 'comics') downloadComicsCsv(comics)
+    else downloadMunitionsCsv(munitions)
+  }
+
+  function renderMain() {
+    if (!loaded) {
+      return (
+        <div className="empty-state">
+          <p>Loading...</p>
+        </div>
+      )
+    }
+
+    if (collection === 'household') {
+      if (view === 'list') {
+        return <InventoryList items={items} onAdjust={handleAdjust} onEdit={startEdit} onDelete={handleDelete} />
+      }
+      if (view === 'add') {
+        return (
+          <ItemForm rooms={rooms} itemNames={itemNames} onSubmit={handleAdd} onCancel={() => setView('list')} />
+        )
+      }
+      if (view === 'edit' && editingItem) {
+        return (
+          <ItemForm
+            rooms={rooms}
+            itemNames={itemNames}
+            initial={editingItem}
+            onSubmit={handleUpdate}
+            onCancel={() => {
+              setEditingItem(null)
+              setView('list')
+            }}
+          />
+        )
+      }
+      return <Dashboard items={items} />
+    }
+
+    if (collection === 'comics') {
+      if (view === 'list') {
+        return <ComicList comics={comics} onEdit={startEditComic} onDelete={handleDeleteComic} />
+      }
+      if (view === 'import') {
+        return <ComicImport onImport={handleImportComics} onCancel={() => setView('list')} />
+      }
+      if (view === 'add') {
+        return <ComicForm locations={comicLocations} onSubmit={handleAddComic} onCancel={() => setView('list')} />
+      }
+      if (view === 'edit' && editingComic) {
+        return (
           <ComicForm
-            locations={locations}
+            locations={comicLocations}
             initial={editingComic}
             onSubmit={handleUpdateComic}
             onCancel={() => {
@@ -210,17 +263,87 @@ function App() {
               setView('list')
             }}
           />
-        ) : (
-          <ComicDashboard comics={comics} />
-        )}
-      </main>
+        )
+      }
+      return <ComicDashboard comics={comics} />
+    }
+
+    if (view === 'list') {
+      return (
+        <MunitionsList
+          items={munitions}
+          onAdjust={handleAdjustMunitions}
+          onEdit={startEditMunitionsItem}
+          onDelete={handleDeleteMunitionsItem}
+        />
+      )
+    }
+    if (view === 'import') {
+      return <MunitionsImport onImport={handleImportMunitions} onCancel={() => setView('list')} />
+    }
+    if (view === 'add') {
+      return (
+        <MunitionsForm
+          locations={munitionsLocations}
+          onSubmit={handleAddMunitionsItem}
+          onCancel={() => setView('list')}
+        />
+      )
+    }
+    if (view === 'edit' && editingMunitionsItem) {
+      return (
+        <MunitionsForm
+          locations={munitionsLocations}
+          initial={editingMunitionsItem}
+          onSubmit={handleUpdateMunitionsItem}
+          onCancel={() => {
+            setEditingMunitionsItem(null)
+            setView('list')
+          }}
+        />
+      )
+    }
+    return <MunitionsDashboard items={munitions} />
+  }
+
+  return (
+    <div className="app">
+      <header className="app-header">
+        <div className="app-header-top">
+          <h1>{COLLECTION_TITLES[collection]}</h1>
+          <div className="header-actions">
+            {hasImport && (
+              <button type="button" className="export-btn" onClick={() => setView('import')}>
+                Import CSV
+              </button>
+            )}
+            <button type="button" className="export-btn" onClick={handleExport} disabled={currentCount === 0}>
+              Export CSV
+            </button>
+          </div>
+        </div>
+        <div className="collection-switcher">
+          {(Object.keys(COLLECTION_LABELS) as Collection[]).map((key) => (
+            <button
+              key={key}
+              type="button"
+              className={collection === key ? 'active' : ''}
+              onClick={() => switchCollection(key)}
+            >
+              {COLLECTION_LABELS[key]}
+            </button>
+          ))}
+        </div>
+      </header>
+
+      <main className="app-main">{renderMain()}</main>
 
       <nav className="bottom-nav">
         <button type="button" className={view === 'list' ? 'active' : ''} onClick={() => setView('list')}>
-          {isHousehold ? 'Inventory' : 'Comics'}
+          {collection === 'household' ? 'Inventory' : COLLECTION_LABELS[collection]}
         </button>
         <button type="button" className={view === 'add' ? 'active' : ''} onClick={() => setView('add')}>
-          {isHousehold ? 'Add Item' : 'Add Comic'}
+          Add {collection === 'household' ? 'Item' : collection === 'comics' ? 'Comic' : 'Item'}
         </button>
         <button
           type="button"

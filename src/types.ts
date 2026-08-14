@@ -32,3 +32,28 @@ export interface Comic {
 }
 
 export type NewComic = Omit<Comic, 'id' | 'createdAt' | 'updatedAt'>
+
+export type MunitionsType = 'Ammunition' | 'Accessory'
+
+export interface MunitionsItem {
+  id: string
+  itemType: MunitionsType
+  name: string
+  manufacturer: string
+  caliber: string
+  category: string
+  bulletWeightGr: number | null
+  bulletType: string
+  roundsPerBox: number | null
+  quantity: number
+  lowStockThreshold: number
+  location: string
+  condition: string
+  notes: string
+  photos: Blob[]
+  customFields: CustomField[]
+  createdAt: number
+  updatedAt: number
+}
+
+export type NewMunitionsItem = Omit<MunitionsItem, 'id' | 'createdAt' | 'updatedAt'>
