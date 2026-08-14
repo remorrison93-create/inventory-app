@@ -22,6 +22,7 @@ export interface Comic {
   issueNumber: string
   publisher: string
   condition: string
+  location: string
   value: number
   notes: string
   photos: Blob[]

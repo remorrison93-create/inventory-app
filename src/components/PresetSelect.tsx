@@ -10,6 +10,7 @@ interface Props {
   placeholder: string
   value: string
   onChange: (value: string) => void
+  required?: boolean
 }
 
 const ADD_NEW = '__add_new__'
@@ -24,6 +25,7 @@ export default function PresetSelect({
   placeholder,
   value,
   onChange,
+  required = true,
 }: Props) {
   const [adding, setAdding] = useState(false)
   const [draft, setDraft] = useState('')
@@ -79,22 +81,24 @@ export default function PresetSelect({
   return (
     <label>
       {label}
-      <select value={value} onChange={handleSelectChange} required>
-        <option value="" disabled>
-          Select...
+      <select value={value} onChange={handleSelectChange} required={required}>
+        <option value="" disabled={required}>
+          {required ? 'Select...' : 'None'}
         </option>
         {extraCurrentValue.map((v) => (
           <option key={v} value={v}>
             {v}
           </option>
         ))}
-        <optgroup label={presetGroupLabel}>
-          {presetOptions.map((opt) => (
-            <option key={opt} value={opt}>
-              {opt}
-            </option>
-          ))}
-        </optgroup>
+        {presetOptions.length > 0 && (
+          <optgroup label={presetGroupLabel}>
+            {presetOptions.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </optgroup>
+        )}
         {customOptions.length > 0 && (
           <optgroup label={customGroupLabel}>
             {customOptions.map((opt) => (

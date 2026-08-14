@@ -10,13 +10,24 @@ interface Props {
 
 export default function ComicList({ comics, onEdit, onDelete }: Props) {
   const [search, setSearch] = useState('')
+  const [locationFilter, setLocationFilter] = useState('All')
+
+  const locations = useMemo(
+    () => ['All', ...Array.from(new Set(comics.map((c) => c.location).filter(Boolean))).sort()],
+    [comics],
+  )
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
-    return comics.filter(
-      (c) => c.title.toLowerCase().includes(q) || c.publisher.toLowerCase().includes(q),
-    )
-  }, [comics, search])
+    return comics.filter((c) => {
+      const matchesLocation = locationFilter === 'All' || c.location === locationFilter
+      const matchesSearch =
+        c.title.toLowerCase().includes(q) ||
+        c.publisher.toLowerCase().includes(q) ||
+        c.location.toLowerCase().includes(q)
+      return matchesLocation && matchesSearch
+    })
+  }, [comics, search, locationFilter])
 
   if (comics.length === 0) {
     return (
@@ -31,10 +42,17 @@ export default function ComicList({ comics, onEdit, onDelete }: Props) {
       <div className="list-filters">
         <input
           type="text"
-          placeholder="Search title or publisher..."
+          placeholder="Search title, publisher, or location..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}>
+          {locations.map((loc) => (
+            <option key={loc} value={loc}>
+              {loc}
+            </option>
+          ))}
+        </select>
       </div>
       {filtered.length === 0 ? (
         <div className="empty-state">

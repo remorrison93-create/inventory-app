@@ -1,19 +1,22 @@
 import { useState, type FormEvent } from 'react'
 import MultiPhotoInput from './MultiPhotoInput'
 import CustomFieldsEditor from './CustomFieldsEditor'
+import PresetSelect from './PresetSelect'
 import type { Comic, CustomField, NewComic } from '../types'
 
 interface Props {
+  locations: string[]
   initial?: Comic
   onSubmit: (comic: NewComic) => void
   onCancel: () => void
 }
 
-export default function ComicForm({ initial, onSubmit, onCancel }: Props) {
+export default function ComicForm({ locations, initial, onSubmit, onCancel }: Props) {
   const [title, setTitle] = useState(initial?.title ?? '')
   const [issueNumber, setIssueNumber] = useState(initial?.issueNumber ?? '')
   const [publisher, setPublisher] = useState(initial?.publisher ?? '')
   const [condition, setCondition] = useState(initial?.condition ?? '')
+  const [location, setLocation] = useState(initial?.location ?? '')
   const [value, setValue] = useState(initial?.value ?? 0)
   const [notes, setNotes] = useState(initial?.notes ?? '')
   const [photos, setPhotos] = useState<Blob[]>(initial?.photos ?? [])
@@ -27,6 +30,7 @@ export default function ComicForm({ initial, onSubmit, onCancel }: Props) {
       issueNumber: issueNumber.trim(),
       publisher: publisher.trim(),
       condition: condition.trim(),
+      location: location.trim(),
       value,
       notes: notes.trim(),
       photos,
@@ -78,6 +82,19 @@ export default function ComicForm({ initial, onSubmit, onCancel }: Props) {
           placeholder="e.g. NM, VF/NM, 9.4"
         />
       </label>
+
+      <PresetSelect
+        label="Location"
+        value={location}
+        onChange={setLocation}
+        presetOptions={[]}
+        customOptions={locations}
+        presetGroupLabel="Common Locations"
+        customGroupLabel="Your Locations"
+        addLabel="+ Add new location..."
+        placeholder="e.g. Slab Box 1, Box 2"
+        required={false}
+      />
 
       <label>
         Value ($)

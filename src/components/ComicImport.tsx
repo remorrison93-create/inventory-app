@@ -14,6 +14,7 @@ const emptyMapping: Record<CoreField, string> = {
   issueNumber: '',
   publisher: '',
   condition: '',
+  location: '',
   value: '',
   notes: '',
 }
@@ -88,6 +89,7 @@ export default function ComicImport({ onImport, onCancel }: Props) {
         issueNumber: mapping.issueNumber ? (row[mapping.issueNumber] ?? '') : '',
         publisher: mapping.publisher ? (row[mapping.publisher] ?? '') : '',
         condition: mapping.condition ? (row[mapping.condition] ?? '') : '',
+        location: mapping.location ? (row[mapping.location] ?? '') : '',
         value: mapping.value ? Number.parseFloat(row[mapping.value] ?? '') || 0 : 0,
         notes: mapping.notes ? (row[mapping.notes] ?? '') : '',
         photos: [],

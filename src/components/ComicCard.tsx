@@ -31,7 +31,10 @@ export default function ComicCard({ comic, onEdit, onDelete }: Props) {
           {comic.title}
           {comic.issueNumber && <span className="comic-issue"> #{comic.issueNumber}</span>}
         </div>
-        <div className="item-room">{comic.publisher}</div>
+        <div className="item-room">
+          {comic.publisher}
+          {comic.location && <span> · {comic.location}</span>}
+        </div>
         {comic.condition && <div className="comic-condition">{comic.condition}</div>}
       </div>
       <div className="comic-value">${comic.value.toFixed(2)}</div>

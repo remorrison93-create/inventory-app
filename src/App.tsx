@@ -45,6 +45,10 @@ function App() {
 
   const rooms = useMemo(() => Array.from(new Set(items.map((i) => i.room))).sort(), [items])
   const itemNames = useMemo(() => Array.from(new Set(items.map((i) => i.name))).sort(), [items])
+  const locations = useMemo(
+    () => Array.from(new Set(comics.map((c) => c.location).filter(Boolean))).sort(),
+    [comics],
+  )
 
   function switchCollection(next: Collection) {
     setCollection(next)
@@ -195,9 +199,10 @@ function App() {
         ) : view === 'import' ? (
           <ComicImport onImport={handleImportComics} onCancel={() => setView('list')} />
         ) : view === 'add' ? (
-          <ComicForm onSubmit={handleAddComic} onCancel={() => setView('list')} />
+          <ComicForm locations={locations} onSubmit={handleAddComic} onCancel={() => setView('list')} />
         ) : view === 'edit' && editingComic ? (
           <ComicForm
+            locations={locations}
             initial={editingComic}
             onSubmit={handleUpdateComic}
             onCancel={() => {
