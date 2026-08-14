@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard'
 import ComicList from './components/ComicList'
 import ComicForm from './components/ComicForm'
 import ComicDashboard from './components/ComicDashboard'
+import ComicImport from './components/ComicImport'
 import {
   addComic,
   addItem,
@@ -21,7 +22,7 @@ import { downloadComicsCsv, downloadItemsCsv } from './csv'
 import type { Comic, Item, NewComic, NewItem } from './types'
 
 type Collection = 'household' | 'comics'
-type View = 'list' | 'add' | 'edit' | 'dashboard'
+type View = 'list' | 'add' | 'edit' | 'dashboard' | 'import'
 
 function App() {
   const [collection, setCollection] = useState<Collection>('household')
@@ -111,6 +112,14 @@ function App() {
     setView('edit')
   }
 
+  async function handleImportComics(newComics: NewComic[]) {
+    const created: Comic[] = []
+    for (const newComic of newComics) {
+      created.push(await addComic(newComic))
+    }
+    setComics((prev) => [...created, ...prev])
+  }
+
   const isHousehold = collection === 'household'
 
   return (
@@ -118,14 +127,21 @@ function App() {
       <header className="app-header">
         <div className="app-header-top">
           <h1>{isHousehold ? 'Home Inventory' : 'Comic Collection'}</h1>
-          <button
-            type="button"
-            className="export-btn"
-            onClick={() => (isHousehold ? downloadItemsCsv(items) : downloadComicsCsv(comics))}
-            disabled={isHousehold ? items.length === 0 : comics.length === 0}
-          >
-            Export CSV
-          </button>
+          <div className="header-actions">
+            {!isHousehold && (
+              <button type="button" className="export-btn" onClick={() => setView('import')}>
+                Import CSV
+              </button>
+            )}
+            <button
+              type="button"
+              className="export-btn"
+              onClick={() => (isHousehold ? downloadItemsCsv(items) : downloadComicsCsv(comics))}
+              disabled={isHousehold ? items.length === 0 : comics.length === 0}
+            >
+              Export CSV
+            </button>
+          </div>
         </div>
         <div className="collection-switcher">
           <button
@@ -176,6 +192,8 @@ function App() {
           )
         ) : view === 'list' ? (
           <ComicList comics={comics} onEdit={startEditComic} onDelete={handleDeleteComic} />
+        ) : view === 'import' ? (
+          <ComicImport onImport={handleImportComics} onCancel={() => setView('list')} />
         ) : view === 'add' ? (
           <ComicForm onSubmit={handleAddComic} onCancel={() => setView('list')} />
         ) : view === 'edit' && editingComic ? (

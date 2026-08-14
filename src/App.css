@@ -23,11 +23,18 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .app-header h1 {
   font-size: 20px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .collection-switcher {
@@ -563,4 +570,78 @@ button.secondary.danger {
   font-weight: 700;
   color: var(--text-h);
   white-space: nowrap;
+}
+
+/* CSV import wizard */
+.import-wizard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.import-help {
+  font-size: 14px;
+  opacity: 0.8;
+  margin: 0;
+}
+
+.import-file-btn {
+  display: inline-flex;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.import-error {
+  color: var(--danger);
+  font-size: 13px;
+  margin: 0;
+}
+
+.import-result {
+  font-size: 15px;
+  color: var(--text-h);
+  margin: 0;
+}
+
+.import-mapping {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.import-mapping label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.import-mapping select {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-h);
+}
+
+.import-extra-columns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.import-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-h);
 }
