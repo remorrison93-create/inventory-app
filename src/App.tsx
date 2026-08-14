@@ -4,6 +4,7 @@ import InventoryList from './components/InventoryList'
 import ItemForm from './components/ItemForm'
 import Dashboard from './components/Dashboard'
 import { addItem, adjustQuantity, deleteItem, getAllItems, updateItem } from './db'
+import { downloadItemsCsv } from './csv'
 import type { Item, NewItem } from './types'
 
 type View = 'inventory' | 'add' | 'edit' | 'dashboard'
@@ -60,6 +61,14 @@ function App() {
     <div className="app">
       <header className="app-header">
         <h1>Home Inventory</h1>
+        <button
+          type="button"
+          className="export-btn"
+          onClick={() => downloadItemsCsv(items)}
+          disabled={items.length === 0}
+        >
+          Export CSV
+        </button>
       </header>
 
       <main className="app-main">

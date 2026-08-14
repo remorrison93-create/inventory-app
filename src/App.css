@@ -14,10 +14,29 @@
   position: sticky;
   top: 0;
   z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .app-header h1 {
   font-size: 20px;
+}
+
+.export-btn {
+  flex-shrink: 0;
+  background: var(--surface);
+  color: var(--text-h);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.export-btn:disabled {
+  opacity: 0.4;
 }
 
 .app-main {
